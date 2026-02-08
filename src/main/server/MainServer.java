@@ -2,6 +2,7 @@ package server;
 
 import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
+import handler.ServiceHandler;
 
 public class MainServer {
     public static void main(String[] args) throws Exception {
@@ -13,7 +14,7 @@ public class MainServer {
             exchange.getResponseBody().write(response.getBytes());
             exchange.getResponseBody().close();
         });
-
+        server.createContext("/services/add", new ServiceHandler());
         server.start();
         System.out.println("Server started on port 8080");
     }
