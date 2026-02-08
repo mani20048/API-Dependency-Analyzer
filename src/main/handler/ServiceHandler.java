@@ -2,6 +2,10 @@ package handler;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import com.google.gson.Gson;
+
+import dao.ServiceDAO;
+import model.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +18,7 @@ public class ServiceHandler implements HttpHandler {
 
         // Allow only POST
         if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
-            exchange.sendResponseHeaders(405, -1); // Method Not Allowed
+            exchange.sendResponseHeaders(405, -1);
             return;
         }
 
@@ -22,10 +26,15 @@ public class ServiceHandler implements HttpHandler {
         InputStream is = exchange.getRequestBody();
         String requestBody = new String(is.readAllBytes(), StandardCharsets.UTF_8);
 
-        System.out.println("Received Service Data: " + requestBody);
+        // Convert JSON -> Java object
+        Gson gson = new Gson();
+        Service service = gson.fromJson(requestBody, Service.class);
 
-        // Temporary response
-        String response = "{ \"message\": \"Service received successfully\" }";
+        // Save to MySQL
+        ServiceDAO.save(service);
+
+        // Response
+        String response = "{ \"message\": \"Service saved successfully\" }";
         exchange.sendResponseHeaders(200, response.length());
         exchange.getResponseBody().write(response.getBytes());
         exchange.getResponseBody().close();
